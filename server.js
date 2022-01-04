@@ -1,13 +1,22 @@
 const express = require('express'); //no important statements since we are in the node and we import it via require
+const mongoose = require('mongoose');
+const bodyParser = require("body-parser");
+const passport = require("passport");
+const users = require("./routes/api/users");
 const socketio = require('socket.io');
 const http = require('http');
 const cors = require('cors'); //we used cors since heroku is used for backend, netlify is used for frontend, we need to connect them
+const session = require('express-session');
+const key = require("./config/keys");
+const Gameroom = require("./models/Gameroom");
+
 //we need cors in this file or else some of our requests(sockets) will be ignored and or  not accepted
 //when we deploy the website sometimes it restricts the resources that are being sent
 
 const { addUser, removeUser, getUser, getProducts, getUsersInRoom } = require ('./socket.js');
+const { Mongoose } = require('mongoose');
 
-const PORT = process.env.PORT || 5000;  //5000 is for local to try it out
+const PORT = process.env.PORT || 8000;  //5000 is for local to try it out
 // const router = require('./router'); //since we created our router and router, we can require router
 // const app = require('express')();
 // const http = require('http').Server(app);
@@ -18,7 +27,30 @@ const server = http.createServer(app);
 const io = socketio(server);  //this is an instance of the socketio
 
 // app.use(router);
-app.use(cors());
+var corsOptions = {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["my-custom-header"],
+    credentials: true
+};
+app.use(cors(corsOptions));
+app.use(session({secret: 'ssshhhhh',saveUninitialized: true,resave: true}));
+app.use(bodyParser.json());
+app.use(
+    bodyParser.urlencoded({
+      extended: true
+    })
+);
+const db = key.mongoURI;
+
+mongoose.connect(db, { useNewUrlParser: true })
+    .then(() => { console.log("Mongo has been successfully connected") })
+    .catch((err) => { console.log(err) });
+
+app.use(passport.initialize());
+require("./config/passport");
+
+app.use("api/users", users);
 
 //This part is for socket.io
 
@@ -59,16 +91,53 @@ io.on('connection', (socket) => {
     });
 
     socket.on('nardechain', ({room: room}, callback) => {
-        console.log(room)
         socket.join(room);
+        Gameroom.find({}).then(rooms => {
+            io.to('nardechain').emit('create_game', rooms);
+            // Gameroom.close();
+        })
+
         // io.to('nardechain').emit('create_game', products);
         callback();
     })
 
     socket.on('create_game_room', (products, callback) => {
-        console.log(products, typeof(products))
-        io.to('nardechain').emit('create_game', products);
+        Gameroom.find({}).then(rooms => {
+            rooms.push(products);
+            io.to('nardechain').emit('create_game', rooms);
+            // Gameroom.close();
+        })
+
+        const newGameroom = new Gameroom({
+            playerA: products.playerA,
+            playerB: products.playerB,
+            ratingA: products.ratingA,
+            ratingB: products.ratingB,
+            length: products.length,
+            clock: products.clock,
+            stake: products.stake,
+            view: products.view,
+            roomID: products.roomID
+        })
+        newGameroom.save()
+            .then(user => console.log(user))
+            .catch(err => console.log(err));
         callback();
+    })
+
+    socket.on('join_game_room', (roomID, callback) => {
+        Gameroom.findOne({ roomID : roomID }).then((product) => {
+            product.playerB = 'drcyber';
+            product.ratingB = 1;
+            product.view = 'view';
+            product.save();
+        })
+        Gameroom.find({}).then(rooms => {
+            rooms[roomID].playerB = 'drcyber';
+            rooms[roomID].ratingB = 1;
+            rooms[roomID].view = 'view';
+            io.to('nardechain').emit('create_game', rooms);
+        })
     })
 
     //gets an event from the front end, frontend emits the msg, backends receives it
@@ -91,8 +160,8 @@ io.on('connection', (socket) => {
     })
 
     /* gameplay */ 
-    socket.on('joinroom', (name, callback) => {
-        console.log(name);
+    //joinroom: when two players join each other and then start new game
+    socket.on('start_game_room', (name, callback) => {
         socket.join(name);
 
         callback();
@@ -104,8 +173,12 @@ io.on('connection', (socket) => {
     })
 
     socket.on('dicemove', (states, callback) => {
-        console.log(states);
         io.to('sage').emit('dicemove_fe', states);
+        callback();
+    })
+
+    socket.on('undo', (states, callback) => {
+        io.to('sage').emit('undo_fe', states);
         callback();
     })
 
@@ -114,9 +187,3 @@ io.on('connection', (socket) => {
 })
 
 server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
-
-
-
-
-
-
