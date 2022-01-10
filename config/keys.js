@@ -1,5 +1,5 @@
 module.exports = {
-    mongoURI: "mongodb://localhost/ogamonista" ,
+    mongoURI: "mongodb://localhost/nardechain" ,
     secretOrKey: "secret",
     validateCode:''
   };

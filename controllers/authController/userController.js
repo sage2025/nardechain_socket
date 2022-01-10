@@ -23,27 +23,53 @@ var transporter = nodemailer.createTransport({
 
 
 exports.register = function(req, res) {
-    const { errors, isValid } = validateRegisterInput(req.body);
-    if (!isValid) { 
-      return res.json({errors : errors});
-    }
-    var validateCode = Math.floor(100000 + Math.random() * 900000);
-    keys.validateCode = validateCode;
-    var mailOptions = {
-      from: `${master_email}`,
-      to: req.body.email,
-      subject: 'Support',
-      text: "Welcome to nardechain.io. In order to validate your email please copy this validate code "+validateCode+" Hope to have a fun!"
-    }
+    // const { errors, isValid } = validateRegisterInput(req.body);
+    // if (!isValid) { 
+    //   return res.json({errors : errors});
+    // }
+    // var validateCode = Math.floor(100000 + Math.random() * 900000);
+    // keys.validateCode = validateCode;
+    // var mailOptions = {
+    //   from: `${master_email}`,
+    //   to: req.body.email,
+    //   subject: 'Support',
+    //   text: "Welcome to nardechain.io. In order to validate your email please copy this validate code "+validateCode+" Hope to have a fun!"
+    // }
 
-    transporter.sendMail( mailOptions, function(err, info) {
-      if(err) {
-        res.json({ msg: "Email not sent" });
-      } else {
-        res.json({ msg: "Email sent" })
-      }
-    } )
-    console.log(keys.validateCode);
+    // transporter.sendMail( mailOptions, function(err, info) {
+    //   if(err) {
+    //     res.json({ msg: "Email not sent" });
+    //   } else {
+    //     res.json({ msg: "Email sent" })
+    //   }
+    // } )
+    User.findOne({ account: req.body.account })
+      .then(user => {
+        user.membership = req.body.membership;
+        user.username = req.body.username;
+        user.name = req.body.name;
+        user.birth = req.body.birth;
+        user.email = req.body.email;
+        user.gender = req.body.gender;
+        user.state = req.body.state;
+        user.code = req.body.code;
+        user.save();
+      })
+      .catch(() => {
+        const newUser = new User({
+          account: req.body.account,
+          membership: req.body.membership,
+          username: req.body.username,
+          name: req.body.name,
+          birth: req.body.birth,
+          email: req.body.email,
+          gender: req.body.gender,
+          state: req.body.state,
+          code: req.body.code,
+        })
+        newUser.save();
+      })
+    res.json({ msg: "success"});
 }
 
 exports.validateRegister = function(req, res) {

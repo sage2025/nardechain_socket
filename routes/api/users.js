@@ -37,9 +37,26 @@ router.get("/userdata", (req, res) => {
     }
   })
 })
+router.get("/getCurUser/:account", ( req, res ) => {
+  var account = req.params.account;
+  console.log(req.params, account);
+  User.findOne({ account: account })
+    .then(user => {
+      res.json({
+        user: user,
+        msg: "y"
+      })
+      console.log(user);
+    })
+    .catch(err => {
+      res.json({
+        msg: "n"
+      });
+      console.log(err);
+    })
+})
 // delete user in datatable
 router.delete("/userfromid/:userId", (req, res) => {
-
   User.findByIdAndDelete(req.params.userId).then( user => {
     if(user) {
       console.log(user);

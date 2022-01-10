@@ -9,6 +9,7 @@ const cors = require('cors'); //we used cors since heroku is used for backend, n
 const session = require('express-session');
 const key = require("./config/keys");
 const Gameroom = require("./models/Gameroom");
+const User = require("./models/User");
 
 //we need cors in this file or else some of our requests(sockets) will be ignored and or  not accepted
 //when we deploy the website sometimes it restricts the resources that are being sent
@@ -23,15 +24,10 @@ const PORT = process.env.PORT || 8000;  //5000 is for local to try it out
 // const io = require('socket.io')(http);
 
 const app = express();
-const server = http.createServer(app);
-const io = socketio(server);  //this is an instance of the socketio
 
 // app.use(router);
 var corsOptions = {
     origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
-    allowedHeaders: ["my-custom-header"],
-    credentials: true
 };
 app.use(cors(corsOptions));
 app.use(session({secret: 'ssshhhhh',saveUninitialized: true,resave: true}));
@@ -50,7 +46,9 @@ mongoose.connect(db, { useNewUrlParser: true })
 app.use(passport.initialize());
 require("./config/passport");
 
-app.use("api/users", users);
+app.use("/api/users", users);
+const server = http.createServer(app);
+const io = socketio(server);  //this is an instance of the socketio
 
 //This part is for socket.io
 
@@ -90,13 +88,23 @@ io.on('connection', (socket) => {
         callback();
     });
 
-    socket.on('nardechain', ({room: room}, callback) => {
+    socket.on('nardechain', ({room: room, account: account}, callback) => {
         socket.join(room);
         Gameroom.find({}).then(rooms => {
             io.to('nardechain').emit('create_game', rooms);
-            // Gameroom.close();
         })
 
+        User.findOne({ account: account })
+            .then(user => {
+            })
+            .catch(error => {
+                const user = new User({
+                    name: "a@a.a",
+                    email: "a@a.a",
+                    account: account
+                });
+                user.save();
+            })
         // io.to('nardechain').emit('create_game', products);
         callback();
     })
