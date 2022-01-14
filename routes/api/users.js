@@ -38,6 +38,11 @@ router.get("/userdata", (req, res) => {
   })
 })
 router.get("/getCurUser/:account", ( req, res ) => {
+  res.setHeader('Access-Control-Allow-Origin', "http://localhost:3000");
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
   var account = req.params.account;
   console.log(req.params, account);
   User.findOne({ account: account })
