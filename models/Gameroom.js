@@ -10,22 +10,22 @@ const GameroomSchema = new Schema({
         type: String,
         required: false
     },
-    playerA: {
+    player: {
         type: String,
         required: false
     },
-    ratingA: {
-        type: String,
-        required: true
-    },
-    playerB: {
-        type: String,
-        required: false
-    },
-    ratingB: {
-        type: String,
-        required: false
-    },
+    // ratingA: {
+    //     type: String,
+    //     required: true
+    // },
+    // playerB: {
+    //     type: String,
+    //     required: false
+    // },
+    // ratingB: {
+    //     type: String,
+    //     required: false
+    // },
     length: {
         type: String,
         required: false
@@ -38,7 +38,7 @@ const GameroomSchema = new Schema({
         type: String,
         required: false
     },
-    view: {
+    join: {
         type: String,
         required: false
     },

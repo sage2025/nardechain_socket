@@ -45,27 +45,27 @@ exports.register = function(req, res) {
     // } )
     User.findOne({ account: req.body.account })
       .then(user => {
-        user.membership = req.body.membership;
+        // user.membership = req.body.membership;
         user.username = req.body.username;
         user.name = req.body.name;
         user.birth = req.body.birth;
-        user.email = req.body.email;
+        // user.email = req.body.email;
         user.gender = req.body.gender;
         user.state = req.body.state;
-        user.code = req.body.code;
+        // user.code = req.body.code;
         user.save();
       })
       .catch(() => {
         const newUser = new User({
           account: req.body.account,
-          membership: req.body.membership,
+          // membership: req.body.membership,
           username: req.body.username,
           name: req.body.name,
           birth: req.body.birth,
-          email: req.body.email,
+          // email: req.body.email,
           gender: req.body.gender,
           state: req.body.state,
-          code: req.body.code,
+          // code: req.body.code,
         })
         newUser.save();
       })

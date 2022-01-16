@@ -20,10 +20,10 @@ const UserSchema = new Schema({
     required: false
   },
 
-  email: {
-    type: String,
-    required: false
-  },
+  // email: {
+  //   type: String,
+  //   required: false
+  // },
   gender: {
     type: String,
     required: false,
@@ -33,20 +33,20 @@ const UserSchema = new Schema({
     type: String,
     required: false
   },
-  code: {
-    type: String,
-    required: false
-  },
+  // code: {
+  //   type: String,
+  //   required: false
+  // },
   avatar : {
     type: String,
     required: false
     
   },
 
-  password: {
-    type: String,
-    required: false
-  },
+  // password: {
+  //   type: String,
+  //   required: false
+  // },
 
 }, {
   timestamps: true

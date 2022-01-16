@@ -27,7 +27,8 @@ const app = express();
 
 // app.use(router);
 var corsOptions = {
-    origin: "http://localhost:3000",
+    origin: "http://nardechain.io",
+    methods: "POST, GET, PUT, DELETE",
 };
 app.use(cors(corsOptions));
 app.use(session({secret: 'ssshhhhh',saveUninitialized: true,resave: true}));
@@ -117,14 +118,11 @@ io.on('connection', (socket) => {
         })
 
         const newGameroom = new Gameroom({
-            playerA: products.playerA,
-            playerB: products.playerB,
-            ratingA: products.ratingA,
-            ratingB: products.ratingB,
+            player: products.player,
+            stake: products.stake,
             length: products.length,
             clock: products.clock,
-            stake: products.stake,
-            view: products.view,
+            join: products.join,
             roomID: products.roomID
         })
         newGameroom.save()
@@ -134,16 +132,14 @@ io.on('connection', (socket) => {
     })
 
     socket.on('join_game_room', (roomID, callback) => {
+        console.log(roomID)
         Gameroom.findOne({ roomID : roomID }).then((product) => {
-            product.playerB = 'drcyber';
-            product.ratingB = 1;
-            product.view = 'view';
+            product.join = 'joined';
             product.save();
         })
         Gameroom.find({}).then(rooms => {
-            rooms[roomID].playerB = 'drcyber';
-            rooms[roomID].ratingB = 1;
-            rooms[roomID].view = 'view';
+            console.log(rooms[roomID])
+            rooms[roomID].join = 'joined';
             io.to('nardechain').emit('create_game', rooms);
         })
     })
