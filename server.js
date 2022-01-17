@@ -72,8 +72,8 @@ MESSAGES
 
 //usually its server.on('request(event name)', requestListener( a function))
 io.on('connection', (socket) => {
-    socket.on('join', ({name, room}, callback) => {
-        const { user, error } = addUser({ id: socket.id, name, room}); //add user function can only return 2 things a user with error property or user property
+    socket.on('join', ({nameA, nameB, room}, callback) => {
+        const { user, error } = addUser({ id: socket.id, nameA, room}); //add user function can only return 2 things a user with error property or user property
         
         if(error) return callback(error); //error handeling
         //no errors
