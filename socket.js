@@ -2,8 +2,8 @@ const products = [];
 const users = []; //users  is an empty array, as when initialized there are none yet
 //function to add User takes three parameters, id of a socket instance
 
-const addUser = ({ id, name, room }) => {
-    name = name.trim().toLowerCase();
+const addUser = ({ id, nameA, room }) => {
+    var name = nameA.trim().toLowerCase();
     room = room.trim().toLowerCase(); 
     //we check if the new user is trying to signup for the same room and the same user name, which cant be allowed 
     //we do this by going through the user array and checking every single user to see if there is any match
