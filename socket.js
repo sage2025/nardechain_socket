@@ -1,7 +1,7 @@
 const products = [];
 const users = []; //users  is an empty array, as when initialized there are none yet
 //function to add User takes three parameters, id of a socket instance
-
+console.log(users)
 const addUser = ({ id, nameA, room }) => {
     var name = nameA.trim().toLowerCase();
     room = room.trim().toLowerCase(); 

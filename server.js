@@ -17,7 +17,7 @@ const User = require("./models/User");
 const { addUser, removeUser, getUser, getProducts, getUsersInRoom } = require ('./socket.js');
 const { Mongoose } = require('mongoose');
 
-const PORT = process.env.PORT || 8000;  //5000 is for local to try it out
+const PORT = process.env.PORT || 80;  //5000 is for local to try it out
 // const router = require('./router'); //since we created our router and router, we can require router
 // const app = require('express')();
 // const http = require('http').Server(app);
@@ -27,6 +27,7 @@ const app = express();
 
 // app.use(router);
 var corsOptions = {
+    // origin: "http://localhost:3000",
     origin: "http://nardechain.io",
     methods: "POST, GET, PUT, DELETE",
 };
@@ -94,20 +95,23 @@ io.on('connection', (socket) => {
         Gameroom.find({}).then(rooms => {
             io.to('nardechain').emit('create_game', rooms);
         })
-
+        var username;
         User.findOne({ account: account })
             .then(user => {
+                if(!user) {
+                    const user = new User({
+                        name: "a@a.a",
+                        email: "a@a.a",
+                        account: account
+                    });
+                    user.save();
+                } else {
+                    username = user.username;
+                    console.log(username);
+                }
             })
-            .catch(error => {
-                const user = new User({
-                    name: "a@a.a",
-                    email: "a@a.a",
-                    account: account
-                });
-                user.save();
-            })
-        // io.to('nardechain').emit('create_game', products);
-        callback();
+        callback('');
+            // io.to('nardechain').emit('create_game', products);
     })
 
     socket.on('create_game_room', (products, callback) => {
@@ -119,6 +123,7 @@ io.on('connection', (socket) => {
 
         const newGameroom = new Gameroom({
             player: products.player,
+            account: products.account,
             stake: products.stake,
             length: products.length,
             clock: products.clock,

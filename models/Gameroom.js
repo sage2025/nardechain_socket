@@ -14,6 +14,10 @@ const GameroomSchema = new Schema({
         type: String,
         required: false
     },
+    account: {
+        type: String,
+        required: false
+    },
     // ratingA: {
     //     type: String,
     //     required: true
