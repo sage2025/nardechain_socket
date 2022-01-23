@@ -40,7 +40,6 @@ const UserSchema = new Schema({
   avatar : {
     type: String,
     required: false
-    
   },
 
   // password: {

@@ -17,7 +17,7 @@ const User = require("./models/User");
 const { addUser, removeUser, getUser, getProducts, getUsersInRoom } = require ('./socket.js');
 const { Mongoose } = require('mongoose');
 
-const PORT = process.env.PORT || 80;  //5000 is for local to try it out
+const PORT = process.env.PORT || 8000;  //5000 is for local to try it out
 // const router = require('./router'); //since we created our router and router, we can require router
 // const app = require('express')();
 // const http = require('http').Server(app);
@@ -102,12 +102,12 @@ io.on('connection', (socket) => {
                     const user = new User({
                         name: "a@a.a",
                         email: "a@a.a",
+                        username: account.substring(2, 7),
                         account: account
                     });
                     user.save();
                 } else {
                     username = user.username;
-                    console.log(username);
                 }
             })
         callback('');
@@ -143,7 +143,6 @@ io.on('connection', (socket) => {
             product.save();
         })
         Gameroom.find({}).then(rooms => {
-            console.log(rooms[roomID])
             rooms[roomID].join = 'joined';
             io.to('nardechain').emit('create_game', rooms);
         })
@@ -172,6 +171,12 @@ io.on('connection', (socket) => {
     //joinroom: when two players join each other and then start new game
     socket.on('start_game_room', (name, callback) => {
         socket.join(name);
+
+        callback();
+    } )
+
+    socket.on('finish_game_room', (name, callback) => {
+        // socket.join(name);
 
         callback();
     } )

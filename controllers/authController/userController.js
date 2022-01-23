@@ -52,6 +52,7 @@ exports.register = function(req, res) {
         // user.email = req.body.email;
         user.gender = req.body.gender;
         user.state = req.body.state;
+        user.avatar = req.body.avatar;
         // user.code = req.body.code;
         user.save();
       })
@@ -65,6 +66,7 @@ exports.register = function(req, res) {
           // email: req.body.email,
           gender: req.body.gender,
           state: req.body.state,
+          avatar: req.body.avatar
           // code: req.body.code,
         })
         newUser.save();
