@@ -17,7 +17,7 @@ const User = require("./models/User");
 const { addUser, removeUser, getUser, getProducts, getUsersInRoom } = require ('./socket.js');
 const { Mongoose } = require('mongoose');
 
-const PORT = process.env.PORT || 8000;  //5000 is for local to try it out
+const PORT = process.env.PORT || 80;  //5000 is for local to try it out
 // const router = require('./router'); //since we created our router and router, we can require router
 // const app = require('express')();
 // const http = require('http').Server(app);
