@@ -28,7 +28,7 @@ const app = express();
 // app.use(router);
 var corsOptions = {
     // origin: "http://localhost:3000",
-    origin: "http://nardechain.io",
+    origin: "http://williamwehby.com.br",
     methods: "POST, GET, PUT, DELETE",
 };
 app.use(cors(corsOptions));
