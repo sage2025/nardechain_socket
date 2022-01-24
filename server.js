@@ -17,7 +17,7 @@ const User = require("./models/User");
 const { addUser, removeUser, getUser, getProducts, getUsersInRoom } = require ('./socket.js');
 const { Mongoose } = require('mongoose');
 
-const PORT = process.env.PORT || 80;  //5000 is for local to try it out
+const PORT = process.env.PORT || 8000;  //5000 is for local to try it out
 // const router = require('./router'); //since we created our router and router, we can require router
 // const app = require('express')();
 // const http = require('http').Server(app);
@@ -28,7 +28,7 @@ const app = express();
 // app.use(router);
 var corsOptions = {
     // origin: "http://localhost:3000",
-    origin: "http://williamwehby.com.br",
+    origin: "http://nardechain.io",
     methods: "POST, GET, PUT, DELETE",
 };
 app.use(cors(corsOptions));
@@ -110,6 +110,9 @@ io.on('connection', (socket) => {
                     username = user.username;
                 }
             })
+        User.find({}).then(users => {
+            io.to('nardechain').emit('ranking', users);
+        })
         callback('');
             // io.to('nardechain').emit('create_game', products);
     })
@@ -136,16 +139,19 @@ io.on('connection', (socket) => {
         callback();
     })
 
-    socket.on('join_game_room', (roomID, callback) => {
+    socket.on('join_game_room', ({ roomID: roomID, opponer: opponer }, callback) => {
         console.log(roomID)
         Gameroom.findOne({ roomID : roomID }).then((product) => {
             product.join = 'joined';
+            product.opponer = opponer;
             product.save();
         })
         Gameroom.find({}).then(rooms => {
             rooms[roomID].join = 'joined';
+            rooms[roomID]   .opponer = opponer;
             io.to('nardechain').emit('create_game', rooms);
         })
+        callback();
     })
 
     //gets an event from the front end, frontend emits the msg, backends receives it
@@ -175,10 +181,23 @@ io.on('connection', (socket) => {
         callback();
     } )
 
-    socket.on('finish_game_room', (name, callback) => {
+    socket.on('finish_game_room', ({roomID : roomID, winner: winner, loser: loser}, callback) => {
         // socket.join(name);
+        console.log(roomID)
+        socket.join('nardechain');
+        Gameroom.findOne({ roomID : roomID }).then(room => {
+            room.finish = 'finished';
+            room.winner = winner;
+            room.loser = loser;
+            room.save();
+        })
 
-        callback();
+        Gameroom.find({}).then( rooms=> {
+            rooms[roomID].finish = 'finished';  
+            rooms[roomID].winner = winner;
+            rooms[roomID].loser = loser;
+            io.to('nardechain').emit('create_game', rooms);
+        })
     } )
 
     socket.on('rolldice', (states, callback) => {

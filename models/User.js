@@ -42,10 +42,18 @@ const UserSchema = new Schema({
     required: false
   },
 
-  // password: {
-  //   type: String,
-  //   required: false
-  // },
+  password: {
+    type: String,
+    required: false
+  },
+  win: {
+    type: String,
+    required: false
+  },
+  loss: {
+    type: String,
+    required: false
+  },
 
 }, {
   timestamps: true

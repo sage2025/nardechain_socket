@@ -14,22 +14,26 @@ const GameroomSchema = new Schema({
         type: String,
         required: false
     },
+    opponer: {
+        type: String,
+        required: false
+    },
     account: {
         type: String,
         required: false
     },
-    // ratingA: {
-    //     type: String,
-    //     required: true
-    // },
-    // playerB: {
-    //     type: String,
-    //     required: false
-    // },
-    // ratingB: {
-    //     type: String,
-    //     required: false
-    // },
+    finish: {
+        type: String,
+        required: false
+    },
+    winner: {
+        type: String,
+        required: false
+    },
+    loser: {
+        type: String,
+        required: false
+    },
     length: {
         type: String,
         required: false
