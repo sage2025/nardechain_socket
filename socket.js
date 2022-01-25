@@ -3,12 +3,8 @@ const users = []; //users  is an empty array, as when initialized there are none
 //function to add User takes three parameters, id of a socket instance
 console.log(users)
 const addUser = ({ id, nameA, room }) => {
-    var name = '';
-    var room = '';
-    if( name !== undefined && name !== null)
-        name = nameA.trim().toLowerCase();
-    if( room !== undefined && room !== null)
-        room = room.trim().toLowerCase(); 
+    var name = nameA.trim().toLowerCase();
+    var room = room.trim().toLowerCase(); 
     //we check if the new user is trying to signup for the same room and the same user name, which cant be allowed 
     //we do this by going through the user array and checking every single user to see if there is any match
     const existingUser = users.find((user) => user.room  === room && user.name === name); 

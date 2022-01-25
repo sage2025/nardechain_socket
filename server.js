@@ -4,6 +4,8 @@ const bodyParser = require("body-parser");
 const passport = require("passport");
 const users = require("./routes/api/users");
 const socketio = require('socket.io');
+const fs = require('fs');
+const https = require('https');
 const http = require('http');
 const cors = require('cors'); //we used cors since heroku is used for backend, netlify is used for frontend, we need to connect them
 const session = require('express-session');
@@ -22,13 +24,21 @@ const PORT = process.env.PORT || 8000;  //5000 is for local to try it out
 // const app = require('express')();
 // const http = require('http').Server(app);
 // const io = require('socket.io')(http);
-
 const app = express();
 
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/cert.pem', 'utf8');
+const ca = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/chain.pem', 'utf8');
+
+const credentials = {
+	key: privateKey,
+	cert: certificate,
+	ca: ca
+};
 // app.use(router);
 var corsOptions = {
-    // origin: "http://localhost:3000",
-    origin: "http://nardechain.io",
+    origin: "https://williamwehby.com.br",
+    // origin: "http://nardechain.io",
     methods: "POST, GET, PUT, DELETE",
 };
 app.use(cors(corsOptions));
@@ -49,8 +59,9 @@ app.use(passport.initialize());
 require("./config/passport");
 
 app.use("/api/users", users);
-const server = http.createServer(app);
-const io = socketio(server);  //this is an instance of the socketio
+// const server = http.createServer(app);
+const httpsServer = https.createServer(credentials, app);
+const io = socketio(httpsServer);  //this is an instance of the socketio
 
 //This part is for socket.io
 
@@ -139,16 +150,16 @@ io.on('connection', (socket) => {
         callback();
     })
 
-    socket.on('join_game_room', ({ roomID: roomID, opponer: opponer }, callback) => {
+    socket.on('join_game_room', ({ roomID: roomID,  account : account }, callback) => {
         console.log(roomID)
         Gameroom.findOne({ roomID : roomID }).then((product) => {
             product.join = 'joined';
-            product.opponer = opponer;
+            product.accountopp = account;
             product.save();
         })
         Gameroom.find({}).then(rooms => {
             rooms[roomID].join = 'joined';
-            rooms[roomID]   .opponer = opponer;
+            rooms[roomID].accountopp = account;
             io.to('nardechain').emit('create_game', rooms);
         })
         callback();
@@ -157,6 +168,7 @@ io.on('connection', (socket) => {
     //gets an event from the front end, frontend emits the msg, backends receives it
     socket.on('sendMessage', (message, callback) =>{
         const user = getUser(socket.id); //we havve access to socket from above
+        console.log(message, user)
         //when the user leaves we send a new message to roomData
         //we also send users since we need to know the new state of the users in the room
         io.to(user.room).emit('message', { user: user.name, text: message });
@@ -219,4 +231,4 @@ io.on('connection', (socket) => {
 
 })
 
-server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
+httpsServer.listen(PORT, () => console.log(`Server has started on port ${PORT}`));

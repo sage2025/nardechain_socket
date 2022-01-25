@@ -22,6 +22,10 @@ const GameroomSchema = new Schema({
         type: String,
         required: false
     },
+    accountopp: {
+        type: String,
+        required: false
+    },
     finish: {
         type: String,
         required: false
