@@ -26,15 +26,15 @@ const PORT = process.env.PORT || 8000;  //5000 is for local to try it out
 // const io = require('socket.io')(http);
 const app = express();
 
-// const privateKey = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/privkey.pem', 'utf8');
-// const certificate = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/cert.pem', 'utf8');
-// const ca = fs.readFileSync('/etc/letsencrypt/live/yourdomain.com/chain.pem', 'utf8');
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/cert.pem', 'utf8');
+const ca = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/chain.pem', 'utf8');
 
-// const credentials = {
-// 	key: privateKey,
-// 	cert: certificate,
-// 	ca: ca
-// };
+const credentials = {
+	key: privateKey,
+	cert: certificate,
+	ca: ca
+};
 // app.use(router);
 var corsOptions = {
     origin: "https://williamwehby.com.br",
@@ -60,8 +60,8 @@ require("./config/passport");
 
 app.use("/api/users", users);
 const server = http.createServer(app);
-// const httpsServer = https.createServer(credentials, app);
-const io = socketio(server);  //this is an instance of the socketio
+const httpsServer = https.createServer(credentials, app);
+const io = socketio.listen(httpsServer);  //this is an instance of the socketio
 
 // httpsServer.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
 // var io = require('socket.io').listen(httpsServer);
@@ -241,4 +241,4 @@ io.on('connection', (socket) => {
 
 })
 
-server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
+httpsServer.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
