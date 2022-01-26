@@ -1,44 +1,28 @@
-const express = require('express'); //no important statements since we are in the node and we import it via require
+const express = require('express'); 
 const mongoose = require('mongoose');
 const bodyParser = require("body-parser");
 const passport = require("passport");
 const users = require("./routes/api/users");
 const socketio = require('socket.io');
-const fs = require('fs');
-const https = require('https');
 const http = require('http');
-const cors = require('cors'); //we used cors since heroku is used for backend, netlify is used for frontend, we need to connect them
+const cors = require('cors'); // cors since heroku is used for backend, netlify is used for frontend, need to connect them
 const session = require('express-session');
 const key = require("./config/keys");
 const Gameroom = require("./models/Gameroom");
 const User = require("./models/User");
 
-//we need cors in this file or else some of our requests(sockets) will be ignored and or  not accepted
-//when we deploy the website sometimes it restricts the resources that are being sent
+const { addUser, removeUser, getUser, getUsersInRoom } = require ('./socket.js');
 
-const { addUser, removeUser, getUser, getProducts, getUsersInRoom } = require ('./socket.js');
-const { Mongoose } = require('mongoose');
-
-const PORT = process.env.PORT || 8000;  //5000 is for local to try it out
+const PORT = process.env.PORT || 8000;  
 // const router = require('./router'); //since we created our router and router, we can require router
 // const app = require('express')();
 // const http = require('http').Server(app);
-// const io = require('socket.io')(http);
+
 const app = express();
 
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/cert.pem', 'utf8');
-const ca = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/chain.pem', 'utf8');
-
-const credentials = {
-	key: privateKey,
-	cert: certificate,
-	ca: ca
-};
 // app.use(router);
 var corsOptions = {
-    origin: "https://williamwehby.com.br",
-    // origin: "http://nardechain.io",
+    origin: "http://nardechain.io",
     methods: "POST, GET, PUT, DELETE",
 };
 app.use(cors(corsOptions));
@@ -60,37 +44,7 @@ require("./config/passport");
 
 app.use("/api/users", users);
 const server = http.createServer(app);
-const httpsServer = https.createServer(credentials, app);
-const io = socketio.listen(httpsServer);  //this is an instance of the socketio
-
-// httpsServer.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
-// var io = require('socket.io').listen(httpsServer);
-// io.set('origins', "https://williamwehby.com.br");
-// io.set('transports', ['websocket',
-//     'flashsocket',
-//     'htmlfile',
-//     'xhr-polling',
-//     'jsonp-polling',
-//     'polling']);
-
-//This part is for socket.io
-
-/*The socket will be connected as a client side socket
-    and we manage this socket that is just connected in here as well hence why we also have the disconnection in here.
-    It is an instance of a socket that we use. 
-  On Join
-    When the socket reads the string join, it calls a call back function.
-    The call back function's parameters is an object with name and room.
-    We are access on the backend here for name& room
-    Theres a callback in the socket.on event that triggers a response whenver the socket.on event is emmitted
- ERROR HANDELING
-    user joined- passes data- do somelogic on backend- pass in a call back that socket.io has gave us 
-    if there is an error we handle it with an alert on the front end
-MESSAGES
-    Admin generated ones are 'message'
-    USer generated are 'sendMessage'
-    
-*/
+const io = socketio.listen(server);  //this is an instance of the socketio
 
 //usually its server.on('request(event name)', requestListener( a function))
 io.on('connection', (socket) => {
@@ -241,4 +195,4 @@ io.on('connection', (socket) => {
 
 })
 
-httpsServer.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
