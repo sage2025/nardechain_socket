@@ -13,8 +13,8 @@ const User = require("./models/User");
 
 const { addUser, removeUser, getUser, getUsersInRoom } = require ('./socket.js');
 
-const PORT = process.env.PORT || 8000;  
-// const router = require('./router'); //since we created our router and router, we can require router
+const PORT = process.env.PORT || 80;  
+// const router = require('./router'); 
 // const app = require('express')();
 // const http = require('http').Server(app);
 
@@ -22,7 +22,8 @@ const app = express();
 
 // app.use(router);
 var corsOptions = {
-    origin: "http://nardechain.io",
+    // origin: "http://nardechain.io",
+    origin: "https://williamwehby.com.br",
     methods: "POST, GET, PUT, DELETE",
 };
 app.use(cors(corsOptions));
@@ -60,7 +61,7 @@ io.on('connection', (socket) => {
         // socket.emit('craete_game', "products");
 
         socket.join(room);
-        //emit to the room that the user belongs too, hence why we pass in user.room to get the users in that room
+        //emit to the room that the user belongs too, hence why pass in user.room to get the users in that room
         io.to(room).emit('roomData', { room: user.room, users: getUsersInRoom(user.room)});
         callback();
     });
@@ -89,14 +90,12 @@ io.on('connection', (socket) => {
             io.to('nardechain').emit('ranking', users);
         })
         callback('');
-            // io.to('nardechain').emit('create_game', products);
     })
 
     socket.on('create_game_room', (products, callback) => {
         Gameroom.find({}).then(rooms => {
             rooms.push(products);
             io.to('nardechain').emit('create_game', rooms);
-            // Gameroom.close();
         })
 
         const newGameroom = new Gameroom({
@@ -115,7 +114,6 @@ io.on('connection', (socket) => {
     })
 
     socket.on('join_game_room', ({ roomID: roomID,  account : account }, callback) => {
-        console.log(roomID)
         Gameroom.findOne({ roomID : roomID }).then((product) => {
             product.join = 'joined';
             product.accountopp = account;
@@ -131,15 +129,14 @@ io.on('connection', (socket) => {
 
     //gets an event from the front end, frontend emits the msg, backends receives it
     socket.on('sendMessage', (message, callback) =>{
-        const user = getUser(socket.id); //we havve access to socket from above
+        const user = getUser(socket.id); 
         console.log(message, user)
-        //when the user leaves we send a new message to roomData
-        //we also send users since we need to know the new state of the users in the room
+        //when the user leaves new message to roomData
+        //send users since need to know the new state of the users in the room
         io.to(user.room).emit('message', { user: user.name, text: message });
         callback();
     })
 
-    //does not take any parameters since we are just unmounting here
     socket.on('disconnect', () => {
         const user = removeUser(socket.id); //remove user when they disconnect
         //admin sends a message to users in the room that _ user has left
@@ -159,7 +156,6 @@ io.on('connection', (socket) => {
 
     socket.on('finish_game_room', ({roomID : roomID, winner: winner, loser: loser}, callback) => {
         // socket.join(name);
-        console.log(roomID)
         socket.join('nardechain');
         Gameroom.findOne({ roomID : roomID }).then(room => {
             room.finish = 'finished';
