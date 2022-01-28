@@ -20,21 +20,21 @@ const PORT = process.env.PORT || 80;
 // const app = require('express')();
 // const http = require('http').Server(app);
 
-const privateKey = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/privkey.pem', 'utf8');
-const certificate = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/cert.pem', 'utf8');
-const ca = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/chain.pem', 'utf8');
+// const privateKey = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/privkey.pem', 'utf8');
+// const certificate = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/cert.pem', 'utf8');
+// const ca = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/chain.pem', 'utf8');
 
-const credentials = {
-	key: privateKey,
-	cert: certificate,
-	ca: ca
-};
+// const credentials = {
+// 	key: privateKey,
+// 	cert: certificate,
+// 	ca: ca
+// };
 
 const app = express();
 
 const server = http.createServer(app);
-const httpsServer = https.createServer(credentials, app);
-const io = socketio(httpsServer);  //this is an instance of the socketio
+// const httpsServer = https.createServer(credentials, app);
+const io = socketio(server);  //this is an instance of the socketio
 
 // app.use(router);
 var corsOptions = {
@@ -205,4 +205,4 @@ io.on('connection', (socket) => {
 
 })
 
-httpsServer.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
+server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
