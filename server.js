@@ -5,6 +5,8 @@ const passport = require("passport");
 const users = require("./routes/api/users");
 const socketio = require('socket.io');
 const http = require('http');
+const fs = require('fs');
+const https = require('https');
 const cors = require('cors'); // cors since heroku is used for backend, netlify is used for frontend, need to connect them
 const session = require('express-session');
 const key = require("./config/keys");
@@ -18,7 +20,21 @@ const PORT = process.env.PORT || 80;
 // const app = require('express')();
 // const http = require('http').Server(app);
 
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/cert.pem', 'utf8');
+const ca = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/chain.pem', 'utf8');
+
+const credentials = {
+	key: privateKey,
+	cert: certificate,
+	ca: ca
+};
+
 const app = express();
+
+const server = http.createServer(app);
+const httpsServer = https.createServer(credentials, app);
+const io = socketio(httpsServer);  //this is an instance of the socketio
 
 // app.use(router);
 var corsOptions = {
@@ -44,8 +60,6 @@ app.use(passport.initialize());
 require("./config/passport");
 
 app.use("/api/users", users);
-const server = http.createServer(app);
-const io = socketio.listen(server);  //this is an instance of the socketio
 
 //usually its server.on('request(event name)', requestListener( a function))
 io.on('connection', (socket) => {
@@ -191,4 +205,4 @@ io.on('connection', (socket) => {
 
 })
 
-server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
+httpsServer.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
