@@ -15,26 +15,26 @@ const User = require("./models/User");
 
 const { addUser, removeUser, getUser, getUsersInRoom } = require ('./socket.js');
 
-const PORT = process.env.PORT || 80;  
+const PORT = process.env.PORT || 443;  
 // const router = require('./router'); 
 // const app = require('express')();
 // const http = require('http').Server(app);
 
-// const privateKey = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/privkey.pem', 'utf8');
-// const certificate = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/cert.pem', 'utf8');
-// const ca = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/chain.pem', 'utf8');
+const privateKey = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/privkey.pem', 'utf8');
+const certificate = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/cert.pem', 'utf8');
+const ca = fs.readFileSync('/etc/letsencrypt/live/gammonist.com/chain.pem', 'utf8');
 
-// const credentials = {
-// 	key: privateKey,
-// 	cert: certificate,
-// 	ca: ca
-// };
+const credentials = {
+	key: privateKey,
+	cert: certificate,
+	ca: ca
+};
 
 const app = express();
 
 const server = http.createServer(app);
-// const httpsServer = https.createServer(credentials, app);
-const io = socketio(server);  //this is an instance of the socketio
+const httpsServer = https.createServer(credentials, app);
+const io = socketio(httpsServer);  //this is an instance of the socketio
 
 // app.use(router);
 var corsOptions = {
@@ -80,29 +80,8 @@ io.on('connection', (socket) => {
         callback();
     });
 
-    socket.on('nardechain', ({room: room, account: account}, callback) => {
+    socket.on('ogamonista', ({room: room}, callback) => {
         socket.join(room);
-        Gameroom.find({}).then(rooms => {
-            io.to('nardechain').emit('create_game', rooms);
-        })
-        var username;
-        User.findOne({ account: account })
-            .then(user => {
-                if(!user) {
-                    const user = new User({
-                        name: "a@a.a",
-                        email: "a@a.a",
-                        username: account.substring(2, 7),
-                        account: account
-                    });
-                    user.save();
-                } else {
-                    username = user.username;
-                }
-            })
-        User.find({}).then(users => {
-            io.to('nardechain').emit('ranking', users);
-        })
         callback('');
     })
 
@@ -201,8 +180,19 @@ io.on('connection', (socket) => {
         callback();
     })
 
+    socket.on('setstore', (states, callback) => {
+        io.to('game').emit('getstore', states);
+        console.log(states)
+        callback();
+    })
+
+    socket.on('getstore', (states, callback) => {
+        // io.to('sage').emit('undo_fe', states);
+        callback();
+    })
+
     /* gameplay */ 
 
 })
 
-server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
+httpsServer.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
