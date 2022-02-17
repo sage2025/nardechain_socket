@@ -23,6 +23,7 @@ router.get("/data", (req, res) => {
     if(err) {
       console.error(err);
     } else {
+      console.log(data);
       res.send(data);
     }
   })
@@ -31,35 +32,41 @@ router.get("/data", (req, res) => {
 router.get("/userdata", (req, res) => {
   User.find().then( user => {
     if(user) {
+      console.log(user)
       return res.json({data1: user});
     }
   })
 })
 router.get("/getCurUser/:account", ( req, res ) => {
-  res.setHeader('Access-Control-Allow-Origin', "http://nardechain.io");
-  // res.setHeader('Access-Control-Allow-Origin', "http://localhost:3000");
+  console.log(res.body, "r")
+  // res.setHeader('Access-Control-Allow-Origin', "http://nardechain.io");
+  res.setHeader('Access-Control-Allow-Origin', "http://localhost:3000");
   res.setHeader('Access-Control-Allow-Credentials', true);
   res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
 
   var account = req.params.account;
+  console.log(req.params, account);
   User.findOne({ account: account })
     .then(user => {
       res.json({
         user: user,
         msg: "y"
       })
+      console.log(user);
     })
     .catch(err => {
       res.json({
         msg: "n"
       });
+      console.log(err);
     })
 })
 // delete user in datatable
 router.delete("/userfromid/:userId", (req, res) => {
   User.findByIdAndDelete(req.params.userId).then( user => {
     if(user) {
+      console.log(user);
       return res.json({deletedusers: user});
     }
   })

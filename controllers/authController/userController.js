@@ -75,6 +75,7 @@ exports.register = function(req, res) {
 }
 
 exports.validateRegister = function(req, res) {
+  console.log(req.body.validateCode, keys.validateCode, "code")
   if(req.body.validateCode !== keys.validateCode) {
     res.json({ msg:"Wrong validate code" })
   } else {
@@ -185,6 +186,7 @@ exports.forgotpassword = function(req, res) {
       if(reset) {
         const updatereset = {$set: {email: req.body.email, token: token}}
         Resetpassword.updateOne({email: req.body.email}, updatereset);
+        console.log(updatereset)
       } else {
         const newreset = new Resetpassword({ 
           email: req.body.email,
@@ -208,6 +210,7 @@ exports.resetpassword = function(req, res) {
           if(err) throw err;
           user.password = hash;
           user.save();
+          console.log(user);
         });
       });
     });
