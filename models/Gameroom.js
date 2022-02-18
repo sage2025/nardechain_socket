@@ -38,6 +38,10 @@ const GameroomSchema = new Schema({
         type: String,
         required: false
     },
+    storeData: {
+        type: String,
+        required: false
+    },
     length: {
         type: String,
         required: false

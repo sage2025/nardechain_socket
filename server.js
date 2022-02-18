@@ -19,7 +19,7 @@ const User = require("./models/User");
 const { addUser, removeUser, getUser, getProducts, getUsersInRoom } = require ('./socket.js');
 const { Mongoose } = require('mongoose');
 
-const PORT = process.env.PORT || 8000;  //5000 is for local to try it out
+const PORT = process.env.PORT || 80;  //5000 is for local to try it out
 // const router = require('./router'); //since we created our router and router, we can require router
 // const app = require('express')();
 // const http = require('http').Server(app);
@@ -37,8 +37,8 @@ const app = express();
 // };
 // app.use(router);
 var corsOptions = {
-    origin: "http://localhost:3000",
-    // origin: "http://nardechain.io",
+    // origin: "http://localhost:3000",
+    origin: "http://nardechain.io",
     methods: "POST, GET, PUT, DELETE",
 };
 app.use(cors(corsOptions));
@@ -203,7 +203,7 @@ io.on('connection', (socket) => {
         callback();
     } )
 
-    socket.on('finish_game_room', ({roomID : roomID, winner: winner, loser: loser}, callback) => {
+    socket.on('finish_game_room', ({roomID : roomID, winner: winner, loser: loser, storeData : storeData}, callback) => {
         // socket.join(name);
         console.log(roomID)
         socket.join('nardechain');
@@ -211,6 +211,7 @@ io.on('connection', (socket) => {
             room.finish = 'finished';
             room.winner = winner;
             room.loser = loser;
+            room.storeData = storeData;
             room.save();
         })
 
@@ -218,25 +219,23 @@ io.on('connection', (socket) => {
             rooms[roomID].finish = 'finished';  
             rooms[roomID].winner = winner;
             rooms[roomID].loser = loser;
+            rooms[roomID].storeData = storeData;
             io.to('nardechain').emit('create_game', rooms);
         })
     } )
 
     socket.on('rolldice', (states, callback) => {
-        io.to('sage').emit('rolldice_fe', states);
+        socket.broadcast.to('sage').emit('rolldice_fe', states);
         callback();
     })
 
     socket.on('dicemove', (states, callback) => {
-        io.to('sage').emit('dicemove_fe', states);
-        if(states.moveArray)
-            key.moveArray.push(moveArray)
-        console.log(key)
+        socket.broadcast.to('sage').emit('dicemove_fe', states);
         callback();
     })
 
     socket.on('undo', (states, callback) => {
-        io.to('sage').emit('undo_fe', states);
+        socket.broadcast.to('sage').emit('undo_fe', states);
         callback();
     })
 
